@@ -60,7 +60,7 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
 
 def orca_batch_job(path_to_xyz_files: str, destination_path: str, job_type: str, RI: str,
                    functional: str="BP86", basis_set: str="def2-SVP", dispersion_correction:str ="D3BJ", grid: str="",
-                   charge: int=0, freq: bool=False, NMR: bool=False, redo_all: bool=False) -> None:
+                   charge: int=0, freq: bool=False, NMR: bool=False, redo_all: bool=False, log_name: str="log") -> None:
     """Performs ORCA calculations based on the xyz files in the given directory."""
     log = f"{job_type} started {datetime.datetime.now()}\n\nCreating directories:\n"
 
@@ -132,10 +132,10 @@ def orca_batch_job(path_to_xyz_files: str, destination_path: str, job_type: str,
         subprocess.run(orca_command, shell=True)
         print(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
         log += f"{job_type} for {cid} completed at {datetime.datetime.now()}\n"
-        with open("logs/NiCO2_geom_opt_log.txt", "w") as log_file:
+        with open(f"logs/{log_name}.txt", "w") as log_file:
             log_file.write(log)
 
     print(f"\n{job_type}s complete.")
     log += f"\n{job_type} ended {datetime.datetime.now()}\n"
-    with open("logs/NiCO2_geom_opt_log.txt", "w") as log_file:
+    with open(f"logs/{log_name}.txt", "w") as log_file:
         log_file.write(log)
