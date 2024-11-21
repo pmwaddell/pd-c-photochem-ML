@@ -9,7 +9,7 @@
 
 </p>
 
-![logo](logo.png)
+![logo](logo.PNG)
 
 > An exploration of how phosphine ligand properties affect Pd-C photocleavage in T-shaped methylpalladium complexes.
 
