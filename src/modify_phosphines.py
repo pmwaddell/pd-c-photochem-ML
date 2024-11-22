@@ -48,6 +48,6 @@ if __name__ == "__main__":
     df = pd.read_csv('data/kraken_data/pruned_phos_set.csv').iloc[:, :2]
 
     complex_df = make_modified_phos_df(
-        df, phos_smiles_to_nico3_complex_smiles, "molecule_id", "_nico3")
-    complex_df.to_csv('data/complex_smiles/nico3_set.csv', index=False)
-    draw_from_phos_df(complex_df, '../misc/extra_complex_smiles/nico3_set.png')
+        df, phos_smiles_to_pdmecl_complex_smiles, "molecule_id", "_PdMeCl")
+    complex_df.to_csv('data/complex_smiles/PdMeCl_set.csv', index=False)
+    draw_from_phos_df(complex_df, '../misc/extra_complex_smiles/PdMeCl_set.png')

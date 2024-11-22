@@ -33,18 +33,19 @@ def lowest_conf_search_from_smiles(smiles: str, label: str, destination_path: st
 
 
 def conformer_search(mols_filename: str, smiles_col: str, label_col: str,
-                     destination_path: str, force_field: str) -> None:
+                     destination_path: str, force_field: str, num_confs: int=100) -> None:
     """Performs conformer search for phosphines from a DataFrame from a PubChem request."""
     for index, row in pd.read_csv(mols_filename).iterrows():
         print(f"Conformer search for label {row[f"{label_col}"]}: ", end="")
         lowest_conf_search_from_smiles(smiles=row[f"{smiles_col}"], label=row[f"{label_col}"],
-                                       destination_path=destination_path, force_field=force_field)
+                                       destination_path=destination_path, force_field=force_field, num_confs=num_confs)
         print("complete.")
 
 
 if __name__ == "__main__":
-    conformer_search(mols_filename="data/complex_smiles/pdmecl_set.csv",
+    conformer_search(mols_filename="data/complex_smiles/PdMeCl_set.csv",
                      smiles_col="smiles",
                      label_col="molecule_id",
-                     destination_path="data/conf_search/pdmecl",
+                     destination_path="data/conf_search/PdMeCl",
+                     num_confs=1000,
                      force_field="MMFF")

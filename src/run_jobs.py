@@ -1,15 +1,8 @@
-from src.orca_jobs import orca_batch_job
+from orca_jobs__old_log_parts import orca_job_sequence
 
 
 if __name__ == "__main__":
-    print("\n\nNi ethylene complex single point calcs: ")
-    orca_batch_job(path_to_xyz_files="data/diimine_data/geom_opt_NiE",
-                   destination_path="data/diimine_data/single_pt_NiE",
-                   functional="B3LYP",
-                   basis_set="def2-TZVP",
-                   RI='RIJCOSX',
-                   dispersion_correction="D3BJ",
-                   charge=1,
-                   NMR=True,
-                   freq=True,
-                   job_type="Single Point Calculation")
+    orca_job_sequence(
+        path_to_conf_search_xyz_files='data/dft_test',
+        destination_path='data/batch_1'
+    )

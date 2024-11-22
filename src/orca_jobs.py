@@ -58,84 +58,105 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
         inp_file.write(header + inp_contents + "\n*")
 
 
-def orca_batch_job(path_to_xyz_files: str, destination_path: str, job_type: str, RI: str,
-                   functional: str="BP86", basis_set: str="def2-SVP", dispersion_correction:str ="D3BJ", grid: str="",
-                   charge: int=0, freq: bool=False, NMR: bool=False, redo_all: bool=False, log_name: str="log") -> None:
-    """Performs ORCA calculations based on the xyz files in the given directory."""
-    log = f"{job_type} started {datetime.datetime.now()}\n\nCreating directories:\n"
+def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, job_type: str, RI: str, functional: str="BP86",
+             basis_set: str="def2-SVP", dispersion_correction:str ="D3BJ", grid: str="", charge: int=0,
+             freq: bool=False, NMR: bool=False) -> None:
+    """Performs ORCA calculations based on the inputs and given xyz file."""
+    # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
+    path_to_xyz_file = path_to_xyz_file.replace("\\", "/")
 
+    if job_type == "Geometry Optimization":
+        full_filename = xyz_filename + "_geom_opt"
+        # Note that xyz_filename should not contain the extension ".xyz"!! It should be the filename part only.
+    elif job_type == "Single Point Calculation":
+        full_filename = xyz_filename + "_single_pt"
+    else:
+        raise Exception(f"Unknown job type {job_type}")
+
+    make_inp_from_xyz(
+        functional=functional,
+        basis_set=basis_set,
+        dispersion_correction=dispersion_correction,
+        RI=RI,
+        job_type=job_type,
+        grid=grid,
+        charge=charge,
+        freq=freq,
+        NMR=NMR,
+        xyz_filename=path_to_xyz_file,
+        inp_destination_path=f"{destination_path}/{full_filename}.inp"
+    )
+
+    # If an existing .out file is found in the directory, check if it seems that it was from a successful calc.
+    # If so, skip doing the geometry optimization for that CID.
+    if os.path.exists(f"{destination_path}/{full_filename}.out"):
+        with open(f"{destination_path}/{full_filename}.out", 'r') as out_file:
+            if out_file.read().splitlines()[-2].strip() == "****ORCA TERMINATED NORMALLY****":
+                print(f"Existing .out file from completed calculation found in {destination_path}, "
+                      f"skipping calculation.")
+                return
+            else:
+                print(f"Existing .out file from apparently unsuccessful calculation found "
+                      f"in {destination_path}, redoing calculation.")
+
+    # Load the absolute path to ORCA from config.yaml; this is necessary for calculations run in parallel.
+    with open("config.yaml") as f:
+        cfg = yaml.load(f, Loader=yaml.FullLoader)
+        orca_path = cfg['orca_path']
+
+    print(f"{datetime.datetime.now()} Performing {job_type} on {xyz_filename}: ", end="")
+    start = time.time()
+    orca_command = f"{orca_path} {destination_path}/{full_filename}.inp > {destination_path}/{full_filename}.out"
+    subprocess.run(orca_command, shell=True)
+    print(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
+
+
+# TODO: ADD LOGGING BACK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# TODO: add arguments for parameters for both geom opt and single point jobs here
+# maybe pass dictionaries for that...
+def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
+                      geom_opt_arguments: dict, single_pt_arguments: dict) -> None:
+    """
+    Perform sequential geometry optimization and single point calculations based on .xyz files in a given directory.
+    """
     # Recursively search for the paths to all xyz files anywhere under the given path:
-    xyz_file_paths = glob.glob(f"{path_to_xyz_files}/**/*.xyz", recursive=True)
-    cids = []
-
+    xyz_file_paths = glob.glob(f"{path_to_conf_search_xyz_files}/**/*.xyz", recursive=True)
     for xyz_file_path in xyz_file_paths:
         # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
         xyz_file_path = xyz_file_path.replace("\\", "/")
-        # Basically, for all intents and purposes, CID herein just means the unique label for this molecule.
-        # It wouldn't have to be an actual CID.
-        cid = xyz_file_path.split("/")[-1][:-4]
+        # TODO: make it clear there is no extension on the xyz filename?
+        xyz_filename = xyz_file_path.split("/")[-1][:-4]  # remove the .xyz as well
+        mol_id = xyz_filename.split("_")[0]
 
-        # Skip trajectory .xyz files, which are produced by geometry opts. They end in _trj.xyz.
-        if cid[-4:] == "_trj":
-            continue
-        cids.append(cid)
+        # TODO: add logging here for when making directories fails?
+        mkdir(f"{destination_path}/{mol_id}")
+        mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
+        mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
 
-        try:
-            mkdir(f"{destination_path}/{cid}")
-        except Exception as e:
-            log += f"{cid}: Directory creation in {destination_path} unsuccessful with exception {e}.\n"
-            continue
-
-        make_inp_from_xyz(
-            functional=functional,
-            basis_set=basis_set,
-            dispersion_correction=dispersion_correction,
-            RI=RI,
-            job_type=job_type,
-            grid=grid,
-            charge=charge,
-            freq=freq,
-            NMR=NMR,
-            xyz_filename=xyz_file_path,
-            inp_destination_path=f"{destination_path}/{cid}/{cid}.inp"
+        # Geometry optimization:
+        orca_job(
+            path_to_xyz_file=xyz_file_path,
+            xyz_filename=xyz_filename,
+            destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt",
+            job_type="Geometry Optimization",
+            functional="BP86",
+            basis_set="def2-SVP",
+            RI="RI",
+            dispersion_correction="D3BJ"
         )
 
-    log += f"\n{job_type} part:\n"
-    print()
-    for cid in cids:
-        if not redo_all:
-            # If an existing .out file is found in the directory, check if it seems that it was from a successful calc.
-            # If so, skip doing the geometry optimization for that CID.
-            if os.path.exists(f"{destination_path}/{cid}/{cid}.out"):
-                with open(f"{destination_path}/{cid}/{cid}.out", 'r') as out_file:
-                    if out_file.read().splitlines()[-2].strip() == "****ORCA TERMINATED NORMALLY****":
-                        msg = (f"Existing .out file from completed calculation found in {destination_path}/{cid}/, "
-                               f"skipping calculation.")
-                        print(msg)
-                        log += msg + "\n"
-                        continue
-                    else:
-                        msg = (f"Existing .out file from apparently unsuccessful calculation found "
-                               f"in {destination_path}/{cid}/, redoing calculation.")
-                        print(msg)
-                        log += msg + "\n"
+        # Single point calculation:
+        orca_job(
+            path_to_xyz_file=xyz_file_path,
+            xyz_filename=xyz_filename,
+            destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt",
+            job_type="Geometry Optimization",
+            functional="BP86",
+            basis_set="def2-SVP",
+            RI="RI",
+            dispersion_correction="D3BJ",
+            NMR=True,
+            freq=True
+        )
 
-        print(f"{datetime.datetime.now()} Performing {job_type} on {cid}: ", end="")
-
-        # Load the absolute path to ORCA from config.yaml; this is necessary for calculations run in parallel.
-        with open("config.yaml") as f:
-            cfg = yaml.load(f, Loader=yaml.FullLoader)
-            orca_path = cfg['orca_path']
-
-        start = time.time()
-        orca_command = f"{orca_path} {destination_path}/{cid}/{cid}.inp > {destination_path}/{cid}/{cid}.out"
-        subprocess.run(orca_command, shell=True)
-        print(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
-        log += f"{job_type} for {cid} completed at {datetime.datetime.now()}\n"
-        with open(f"logs/{log_name}.txt", "w") as log_file:
-            log_file.write(log)
-
-    print(f"\n{job_type}s complete.")
-    log += f"\n{job_type} ended {datetime.datetime.now()}\n"
-    with open(f"logs/{log_name}.txt", "w") as log_file:
-        log_file.write(log)
