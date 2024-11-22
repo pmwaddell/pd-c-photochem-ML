@@ -5,11 +5,11 @@
 import datetime
 import glob
 import os
+import logging
 import subprocess
 import time
 
 import yaml
-from scipy.cluster.hierarchy import single
 
 
 def mkdir(dir_name: str) -> None:
@@ -26,8 +26,9 @@ def mkdir(dir_name: str) -> None:
 
 
 def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: str, RI: str,
-                      functional: str="BP86", basis_set: str="def2-SVP", dispersion_correction:str ="D3BJ",
-                      grid:str ="", charge: int=0, freq: bool=False, NMR: bool=False, cores=6) -> None:
+                      functional: str="BP86", basis_set: str="def2-SVP", newgto: str="",
+                      dispersion_correction:str ="D3BJ", solvent:str ="", grid:str ="", charge: int=0,
+                      freq: bool=False, NMR: bool=False, cores=6) -> None:
     """Produces an ORCA input file for geom. opt. from xyz file."""
     # The choices of keywords here are from: https://sites.google.com/site/orcainputlibrary/geometry-optimizations
     # RI: RI-J approximation for Coulomb integrals: speed calculations at cost of small error, used for GGA calcs.
@@ -38,7 +39,7 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
     # Here we're using 6 cores by default.
 
     if job_type == "Geometry Optimization":
-        job_keywords = "TIGHTSCF Opt"
+        job_keywords = "TightSCF Opt"
     elif job_type == "Single Point Calculation":
         job_keywords = "NormalSCF"
     else:
@@ -47,10 +48,14 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
     freq = "Freq" if freq else ""
     NMR = "NMR" if NMR else ""
     if grid != "":
-        grid = f"\n! {grid}"
+        grid = f"! {grid}\n"
+    if newgto != "":
+        newgto = f"%basis\nnewgto {newgto} end\nend\n"
 
-    header = (f"! {RI} {functional} {basis_set} {dispersion_correction} {job_keywords} {freq} {NMR}{grid}"
-              f"\n%pal\nnprocs {cores}\nend\n\n* xyz {charge} 1\n")
+    header = (f"! {RI} {functional} {basis_set} {dispersion_correction} {job_keywords} {solvent} {freq} {NMR}\n"
+              f"{newgto}"
+              f"{grid}"
+              f"%pal\nnprocs {cores}\nend\n\n* xyz {charge} 1\n")
     with open(xyz_filename, 'r') as xyz_file:
         # Remove the initial lines of the xyz file, leaving only the atoms and their coordinates:
         inp_contents = "\n".join(xyz_file.read().splitlines()[2:])
@@ -59,9 +64,9 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
         inp_file.write(header + inp_contents + "\n*")
 
 
-def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, job_type: str, RI: str, functional: str="BP86",
-             basis_set: str="def2-SVP", dispersion_correction:str ="D3BJ", grid: str="", charge: int=0,
-             freq: bool=False, NMR: bool=False) -> None:
+def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, job_type: str, RI: str,
+             functional: str="BP86", basis_set: str="def2-SVP", newgto: str="", dispersion_correction:str ="D3BJ",
+             solvent:str ="", grid: str="", charge: int=0, freq: bool=False, NMR: bool=False) -> None:
     """Performs ORCA calculations based on the inputs and given xyz file."""
     # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
     path_to_xyz_file = path_to_xyz_file.replace("\\", "/")
@@ -77,10 +82,12 @@ def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, jo
     make_inp_from_xyz(
         functional=functional,
         basis_set=basis_set,
+        newgto=newgto,
         dispersion_correction=dispersion_correction,
         RI=RI,
         job_type=job_type,
         grid=grid,
+        solvent=solvent,
         charge=charge,
         freq=freq,
         NMR=NMR,
@@ -112,9 +119,6 @@ def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, jo
     print(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
 
 
-# TODO: ADD LOGGING BACK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-# TODO: add arguments for parameters for both geom opt and single point jobs here
 # maybe pass dictionaries for that...
 def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                       geom_opt_arguments: dict, single_pt_arguments: dict) -> None:
@@ -134,7 +138,6 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
         xyz_filename = xyz_file_path.split("/")[-1][:-4]  # remove the .xyz as well
         mol_id = xyz_filename.split("_")[0]
 
-        # TODO: add logging here for when making directories fails?
         print()
         mkdir(f"{destination_path}/{mol_id}")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
@@ -149,8 +152,10 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
             job_type="Geometry Optimization",
             functional=geom_opt_arguments["functional"],
             basis_set=geom_opt_arguments["basis_set"],
+            newgto=geom_opt_arguments["newgto"],
             RI=geom_opt_arguments["RI"],
-            dispersion_correction=geom_opt_arguments["dispersion_correction"]
+            dispersion_correction=geom_opt_arguments["dispersion_correction"],
+            solvent=geom_opt_arguments["solvent"]
         )
 
         # Single point calculation:
@@ -161,8 +166,10 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
             job_type="Single Point Calculation",
             functional=single_pt_arguments["functional"],
             basis_set=single_pt_arguments["basis_set"],
+            newgto=single_pt_arguments["newgto"],
             RI=single_pt_arguments["RI"],
             dispersion_correction=single_pt_arguments["dispersion_correction"],
+            solvent=single_pt_arguments["solvent"],
             NMR=single_pt_arguments["NMR"],
             freq=single_pt_arguments["freq"]
         )
