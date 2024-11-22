@@ -9,6 +9,7 @@ import subprocess
 import time
 
 import yaml
+from scipy.cluster.hierarchy import single
 
 
 def mkdir(dir_name: str) -> None:
@@ -122,41 +123,46 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
     """
     # Recursively search for the paths to all xyz files anywhere under the given path:
     xyz_file_paths = glob.glob(f"{path_to_conf_search_xyz_files}/**/*.xyz", recursive=True)
+
+    print(f"List of .xyz files found: {xyz_file_paths}.")
+    print(f"Geometry Optimization arguments: {geom_opt_arguments}")
+    print(f"Single Point Calculation arguments: {single_pt_arguments}\n")
+
     for xyz_file_path in xyz_file_paths:
         # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
         xyz_file_path = xyz_file_path.replace("\\", "/")
-        # TODO: make it clear there is no extension on the xyz filename?
         xyz_filename = xyz_file_path.split("/")[-1][:-4]  # remove the .xyz as well
         mol_id = xyz_filename.split("_")[0]
 
         # TODO: add logging here for when making directories fails?
+        print()
         mkdir(f"{destination_path}/{mol_id}")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
 
+        print()
         # Geometry optimization:
         orca_job(
             path_to_xyz_file=xyz_file_path,
             xyz_filename=xyz_filename,
             destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt",
             job_type="Geometry Optimization",
-            functional="BP86",
-            basis_set="def2-SVP",
-            RI="RI",
-            dispersion_correction="D3BJ"
+            functional=geom_opt_arguments["functional"],
+            basis_set=geom_opt_arguments["basis_set"],
+            RI=geom_opt_arguments["RI"],
+            dispersion_correction=geom_opt_arguments["dispersion_correction"]
         )
 
         # Single point calculation:
         orca_job(
             path_to_xyz_file=xyz_file_path,
             xyz_filename=xyz_filename,
-            destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt",
-            job_type="Geometry Optimization",
-            functional="BP86",
-            basis_set="def2-SVP",
-            RI="RI",
-            dispersion_correction="D3BJ",
-            NMR=True,
-            freq=True
+            destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
+            job_type="Single Point Calculation",
+            functional=single_pt_arguments["functional"],
+            basis_set=single_pt_arguments["basis_set"],
+            RI=single_pt_arguments["RI"],
+            dispersion_correction=single_pt_arguments["dispersion_correction"],
+            NMR=single_pt_arguments["NMR"],
+            freq=single_pt_arguments["freq"]
         )
-
