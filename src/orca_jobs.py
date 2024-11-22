@@ -5,9 +5,10 @@
 import datetime
 import glob
 import os
-import logging
 import subprocess
 import time
+import logging
+logger = logging.getLogger(__name__)
 
 import yaml
 
@@ -16,13 +17,13 @@ def mkdir(dir_name: str) -> None:
     """Creates a directory."""
     try:
         os.mkdir(dir_name)
-        print(f"Directory '{dir_name}' created successfully.")
+        logger.info(f"Directory '{dir_name}' created successfully.")
     except FileExistsError:
-        print(f"Warning: Directory '{dir_name}' already exists.")
+        logger.warning(f"Warning: Directory '{dir_name}' already exists.")
     except PermissionError:
-        print(f"Warning: Permission denied: Unable to create '{dir_name}'.")
+        logger.warning(f"Warning: Permission denied: Unable to create '{dir_name}'.")
     except Exception as e:
-        print(f"Warning: An error occurred: {e}")
+        logger.error(f"Warning: An error occurred: {e}")
 
 
 def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: str, RI: str,
@@ -37,12 +38,12 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
     # TIGHTSCF: convergence tolerance level, this is recommended for geometry optimizations.
     # NormalSCF: used for single point calculations.
     # Here we're using 6 cores by default.
-
     if job_type == "Geometry Optimization":
         job_keywords = "TightSCF Opt"
     elif job_type == "Single Point Calculation":
         job_keywords = "NormalSCF"
     else:
+        logger.error(f"Unknown job type: {job_type}")
         raise Exception(f"Unknown job type {job_type}")
 
     freq = "Freq" if freq else ""
@@ -64,9 +65,10 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
         inp_file.write(header + inp_contents + "\n*")
 
 
-def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, job_type: str, RI: str,
-             functional: str="BP86", basis_set: str="def2-SVP", newgto: str="", dispersion_correction:str ="D3BJ",
-             solvent:str ="", grid: str="", charge: int=0, freq: bool=False, NMR: bool=False) -> None:
+def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, job_type: str,
+             RI: str, functional: str="BP86", basis_set: str="def2-SVP", newgto: str="",
+             dispersion_correction:str ="D3BJ", solvent:str ="", grid: str="", charge: int=0, freq: bool=False,
+             NMR: bool=False) -> None:
     """Performs ORCA calculations based on the inputs and given xyz file."""
     # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
     path_to_xyz_file = path_to_xyz_file.replace("\\", "/")
@@ -77,6 +79,7 @@ def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, jo
     elif job_type == "Single Point Calculation":
         full_filename = xyz_filename + "_single_pt"
     else:
+        logger.error(f"Unknown job type: {job_type}")
         raise Exception(f"Unknown job type {job_type}")
 
     make_inp_from_xyz(
@@ -96,41 +99,40 @@ def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, jo
     )
 
     # If an existing .out file is found in the directory, check if it seems that it was from a successful calc.
-    # If so, skip doing the geometry optimization for that CID.
+    # If so, skip doing the calculation.
     if os.path.exists(f"{destination_path}/{full_filename}.out"):
         with open(f"{destination_path}/{full_filename}.out", 'r') as out_file:
             if out_file.read().splitlines()[-2].strip() == "****ORCA TERMINATED NORMALLY****":
-                print(f"Existing .out file from completed calculation found in {destination_path}, "
-                      f"skipping calculation.")
+                logger.info(f"Existing .out file from completed calculation found in {destination_path}, "
+                            f"skipping calculation.")
                 return
             else:
-                print(f"Existing .out file from apparently unsuccessful calculation found "
-                      f"in {destination_path}, redoing calculation.")
+                logger.warning(f"Existing .out file from apparently unsuccessful calculation found "
+                               f"in {destination_path}, redoing calculation.")
 
     # Load the absolute path to ORCA from config.yaml; this is necessary for calculations run in parallel.
     with open("config.yaml") as f:
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         orca_path = cfg['orca_path']
 
-    print(f"{datetime.datetime.now()} Performing {job_type} on {xyz_filename}: ", end="")
+    logger.info(f"Performing {job_type} on {xyz_filename}: ")
     start = time.time()
     orca_command = f"{orca_path} {destination_path}/{full_filename}.inp > {destination_path}/{full_filename}.out"
     subprocess.run(orca_command, shell=True)
-    print(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
+    logger.info(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
 
 
-# maybe pass dictionaries for that...
 def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
-                      geom_opt_arguments: dict, single_pt_arguments: dict) -> None:
+                      geom_opt_arguments: dict, single_pt_arguments: dict, log_path="logs/log.log") -> None:
     """
     Perform sequential geometry optimization and single point calculations based on .xyz files in a given directory.
     """
     # Recursively search for the paths to all xyz files anywhere under the given path:
     xyz_file_paths = glob.glob(f"{path_to_conf_search_xyz_files}/**/*.xyz", recursive=True)
 
-    print(f"List of .xyz files found: {xyz_file_paths}.")
-    print(f"Geometry Optimization arguments: {geom_opt_arguments}")
-    print(f"Single Point Calculation arguments: {single_pt_arguments}\n")
+    logger.info(f"List of .xyz files found: {xyz_file_paths}.")
+    logger.info(f"Geometry Optimization arguments: {geom_opt_arguments}")
+    logger.info(f"Single Point Calculation arguments: {single_pt_arguments}\n")
 
     for xyz_file_path in xyz_file_paths:
         # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:

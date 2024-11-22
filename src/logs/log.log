@@ -1,0 +1,8 @@
+18:14:23 List of .xyz files found: ['data/dft_test\\12_PdMeCl.xyz', 'data/dft_test\\8_PdMeCl.xyz'].
+18:14:23 Geometry Optimization arguments: {'functional': 'B3LYP', 'basis_set': '6-311++G(d,p)', 'newgto': '46 "LANL2DZ"', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)'}
+18:14:23 Single Point Calculation arguments: {'functional': 'CAM-B3LYP', 'basis_set': '6-311++G(d,p)', 'newgto': '46 "LANL2DZ"', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)', 'NMR': True, 'freq': True}
+
+18:14:23 Warning: Directory 'data/batch_1_CAM_B3LYP/12' already exists.
+18:14:23 Warning: Directory 'data/batch_1_CAM_B3LYP/12/12_PdMeCl_geom_opt' already exists.
+18:14:23 Warning: Directory 'data/batch_1_CAM_B3LYP/12/12_PdMeCl_single_pt' already exists.
+18:14:23 2024-11-22 18:14:23.383023 Performing Geometry Optimization on 12_PdMeCl: 
