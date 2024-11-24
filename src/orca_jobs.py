@@ -143,6 +143,7 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
         mkdir(f"{destination_path}/{mol_id}")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
+        logger.info("\n")
 
         # Geometry optimization:
         orca_job(

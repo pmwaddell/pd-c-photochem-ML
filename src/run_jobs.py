@@ -12,7 +12,7 @@ def configure_logging(log_filename: str="logs/log.log") -> None:
         level=logging.INFO,
         format='%(asctime)s %(message)s',
         datefmt='%H:%M:%S',
-        handlers=[logging.FileHandler("logs/log.log", mode='w'),
+        handlers=[logging.FileHandler(f"logs/{log_filename}.log", mode='w'),
                   stream_handler]
     )
 
