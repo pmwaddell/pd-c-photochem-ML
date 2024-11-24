@@ -119,7 +119,7 @@ def orca_job(path_to_xyz_file: str, xyz_filename: str, destination_path: str, jo
     start = time.time()
     orca_command = f"{orca_path} {destination_path}/{full_filename}.inp > {destination_path}/{full_filename}.out"
     subprocess.run(orca_command, shell=True)
-    logger.info(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}")
+    logger.info(f"complete. Total time: {datetime.timedelta(seconds=time.time() - start)}\n")
 
 
 def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
@@ -140,12 +140,10 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
         xyz_filename = xyz_file_path.split("/")[-1][:-4]  # remove the .xyz as well
         mol_id = xyz_filename.split("_")[0]
 
-        print()
         mkdir(f"{destination_path}/{mol_id}")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
 
-        print()
         # Geometry optimization:
         orca_job(
             path_to_xyz_file=xyz_file_path,
@@ -160,9 +158,9 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
             solvent=geom_opt_arguments["solvent"]
         )
 
-        # Single point calculation:
+        # Single point calculation from the geometry optimization .xyz file:
         orca_job(
-            path_to_xyz_file=xyz_file_path,
+            path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
             xyz_filename=xyz_filename,
             destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
             job_type="Single Point Calculation",
@@ -175,3 +173,4 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
             NMR=single_pt_arguments["NMR"],
             freq=single_pt_arguments["freq"]
         )
+        logger.info("Geometry optimization and single point calculation steps complete.\n\n")

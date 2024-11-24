@@ -1,8 +1,26 @@
-18:14:23 List of .xyz files found: ['data/dft_test\\12_PdMeCl.xyz', 'data/dft_test\\8_PdMeCl.xyz'].
-18:14:23 Geometry Optimization arguments: {'functional': 'B3LYP', 'basis_set': '6-311++G(d,p)', 'newgto': '46 "LANL2DZ"', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)'}
-18:14:23 Single Point Calculation arguments: {'functional': 'CAM-B3LYP', 'basis_set': '6-311++G(d,p)', 'newgto': '46 "LANL2DZ"', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)', 'NMR': True, 'freq': True}
+00:01:05 List of .xyz files found: ['data/LOT_benchmarks/LOT_benchmark_inputs\\12_PdMeCl.xyz', 'data/LOT_benchmarks/LOT_benchmark_inputs\\8_PdMeCl.xyz'].
+00:01:05 Geometry Optimization arguments: {'functional': 'B3LYP', 'basis_set': 'def2-TZVP', 'newgto': '', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)'}
+00:01:05 Single Point Calculation arguments: {'functional': 'CAM-B3LYP', 'basis_set': 'def2-TZVP', 'newgto': '', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)', 'NMR': True, 'freq': True}
 
-18:14:23 Warning: Directory 'data/batch_1_CAM_B3LYP/12' already exists.
-18:14:23 Warning: Directory 'data/batch_1_CAM_B3LYP/12/12_PdMeCl_geom_opt' already exists.
-18:14:23 Warning: Directory 'data/batch_1_CAM_B3LYP/12/12_PdMeCl_single_pt' already exists.
-18:14:23 2024-11-22 18:14:23.383023 Performing Geometry Optimization on 12_PdMeCl: 
+00:01:05 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVP/12' created successfully.
+00:01:05 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVP/12/12_PdMeCl_geom_opt' created successfully.
+00:01:05 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVP/12/12_PdMeCl_single_pt' created successfully.
+00:01:05 Performing Geometry Optimization on 12_PdMeCl: 
+02:41:26 complete. Total time: 2:40:20.150485
+02:41:26 Performing Single Point Calculation on 12_PdMeCl: 
+04:23:35 complete. Total time: 1:42:09.861145
+04:23:35 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVP/8' created successfully.
+04:23:35 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVP/8/8_PdMeCl_geom_opt' created successfully.
+04:23:35 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVP/8/8_PdMeCl_single_pt' created successfully.
+04:23:36 Performing Geometry Optimization on 8_PdMeCl: 
+06:38:30 complete. Total time: 2:14:54.391347
+06:38:30 Performing Single Point Calculation on 8_PdMeCl: 
+08:07:52 complete. Total time: 1:29:22.192069
+08:07:52 List of .xyz files found: ['data/LOT_benchmarks/LOT_benchmark_inputs\\12_PdMeCl.xyz', 'data/LOT_benchmarks/LOT_benchmark_inputs\\8_PdMeCl.xyz'].
+08:07:52 Geometry Optimization arguments: {'functional': 'B3LYP', 'basis_set': 'def2-TZVPP', 'newgto': '', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)'}
+08:07:52 Single Point Calculation arguments: {'functional': 'CAM-B3LYP', 'basis_set': 'def2-TZVPP', 'newgto': '', 'RI': 'RIJCOSX', 'dispersion_correction': 'D3BJ', 'solvent': 'CPCM(Chloroform)', 'NMR': True, 'freq': True}
+
+08:07:52 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVPP/12' created successfully.
+08:07:52 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVPP/12/12_PdMeCl_geom_opt' created successfully.
+08:07:52 Directory 'data/LOT_benchmarks/basis_sets/def2-TZVPP/12/12_PdMeCl_single_pt' created successfully.
+08:07:52 Performing Geometry Optimization on 12_PdMeCl: 
