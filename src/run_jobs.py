@@ -162,6 +162,7 @@ if __name__ == "__main__":
         single_pt_arguments=single_pt_arguments
     )
 
+    # TODO: MOVE TO 2nd COMPUTER
     # aug-pcseg-2
     geom_opt_arguments = dict(
         functional="B3LYP",
