@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from orca_jobs import orca_job_sequence
+from orca_jobs import orca_job, make_uv_vis_plot
 
 
 def configure_logging(log_filename: str="logs/log.log") -> None:
@@ -18,203 +18,47 @@ def configure_logging(log_filename: str="logs/log.log") -> None:
 
 
 if __name__ == "__main__":
-    configure_logging("lot_benchmarks.log")
+    configure_logging("lot_benchmarks")
 
-    # TODO: seems to be giving us problems with Pd, might have to work out newgto again?
-    # TODO skip for now but revisit this...
-    # # 6311
-    # geom_opt_arguments = dict(
-    #     functional="B3LYP",
-    #     basis_set="6-311++G(d,p)",
-    #     newgto='',
-    #     RI="RIJCOSX",
-    #     dispersion_correction="D3BJ",
-    #     solvent="CPCM(Chloroform)"
-    # )
-    #
-    # single_pt_arguments = dict(
+    # TDDFT time
+    # orca_job(
+    #     path_to_xyz_file="data/LOT_benchmarks/LOT_benchmark_inputs/8_PdMeCl_def2-TZVP_geom_opt.xyz",
+    #     xyz_filename_no_extension="8_PdMeCl_geom_opt",
+    #     destination_path="data/LOT_benchmarks/TDDFT/pcseg-2_LANL2DZ",
+    #     job_type="TDDFT Calculation",
+    #     RI="autoaux RIJCOSX",
     #     functional="CAM-B3LYP",
-    #     basis_set="6-311++G(d,p)",
-    #     newgto='',
-    #     RI="RIJCOSX",
+    #     basis_set="pcseg-2",
     #     dispersion_correction="D3BJ",
     #     solvent="CPCM(Chloroform)",
-    #     NMR=True,
-    #     freq=True
-    # )
-    #
-    # orca_job_sequence(
-    #     path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-    #     destination_path='data/LOT_benchmarks/basis_sets/6311',
-    #     geom_opt_arguments=geom_opt_arguments,
-    #     single_pt_arguments=single_pt_arguments
+    #     newgto='46 "LANL2DZ"',
+    #     grid=""
     # )
 
-    # def2-TZVP
-    geom_opt_arguments = dict(
-        functional="B3LYP",
-        basis_set="def2-TZVP",
-        newgto='',
+    orca_job(
+        path_to_xyz_file="data/LOT_benchmarks/LOT_benchmark_inputs/8_PdMeCl_def2-TZVP_geom_opt.xyz",
+        xyz_filename_no_extension="8_PdMeCl_geom_opt",
+        destination_path="data/LOT_benchmarks/TDDFT/aug-pcseg-2_LANL2DZ",
+        job_type="TDDFT Calculation",
         RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)"
-    )
-
-    single_pt_arguments = dict(
-        functional="CAM-B3LYP",
-        basis_set="def2-TZVP",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)",
-        NMR=True,
-        freq=True
-    )
-
-    orca_job_sequence(
-        path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-        destination_path='data/LOT_benchmarks/basis_sets/def2-TZVP',
-        geom_opt_arguments=geom_opt_arguments,
-        single_pt_arguments=single_pt_arguments
-    )
-
-    # def2-TZVPP
-    geom_opt_arguments = dict(
-        functional="B3LYP",
-        basis_set="def2-TZVPP",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)"
-    )
-
-    single_pt_arguments = dict(
-        functional="CAM-B3LYP",
-        basis_set="def2-TZVPP",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)",
-        NMR=True,
-        freq=True
-    )
-
-    orca_job_sequence(
-        path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-        destination_path='data/LOT_benchmarks/basis_sets/def2-TZVPP',
-        geom_opt_arguments=geom_opt_arguments,
-        single_pt_arguments=single_pt_arguments
-    )
-
-    # def2-TZVPD
-    geom_opt_arguments = dict(
-        functional="B3LYP",
-        basis_set="def2-TZVPD",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)"
-    )
-
-    single_pt_arguments = dict(
-        functional="CAM-B3LYP",
-        basis_set="def2-TZVPD",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)",
-        NMR=True,
-        freq=True
-    )
-
-    orca_job_sequence(
-        path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-        destination_path='data/LOT_benchmarks/basis_sets/def2-TZVPD',
-        geom_opt_arguments=geom_opt_arguments,
-        single_pt_arguments=single_pt_arguments
-    )
-
-    # pcseg-2
-    geom_opt_arguments = dict(
-        functional="B3LYP",
-        basis_set="pcseg-2",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)"
-    )
-
-    single_pt_arguments = dict(
-        functional="CAM-B3LYP",
-        basis_set="pcseg-2",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)",
-        NMR=True,
-        freq=True
-    )
-
-    orca_job_sequence(
-        path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-        destination_path='data/LOT_benchmarks/basis_sets/pcseg-2',
-        geom_opt_arguments=geom_opt_arguments,
-        single_pt_arguments=single_pt_arguments
-    )
-
-    # TODO: MOVE TO 2nd COMPUTER
-    # aug-pcseg-2
-    geom_opt_arguments = dict(
-        functional="B3LYP",
-        basis_set="aug-pcseg-2",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="CPCM(Chloroform)"
-    )
-
-    single_pt_arguments = dict(
         functional="CAM-B3LYP",
         basis_set="aug-pcseg-2",
-        newgto='',
-        RI="RIJCOSX",
         dispersion_correction="D3BJ",
         solvent="CPCM(Chloroform)",
-        NMR=True,
-        freq=True
+        newgto='46 "LANL2DZ"',
+        grid=""
     )
 
-    orca_job_sequence(
-        path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-        destination_path='data/LOT_benchmarks/basis_sets/aug-pcseg-2',
-        geom_opt_arguments=geom_opt_arguments,
-        single_pt_arguments=single_pt_arguments
-    )
-
-    # def2-TZVP NO SOLVENT
-    geom_opt_arguments = dict(
-        functional="B3LYP",
-        basis_set="def2-TZVP",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent=""
-    )
-
-    single_pt_arguments = dict(
-        functional="CAM-B3LYP",
-        basis_set="def2-TZVP",
-        newgto='',
-        RI="RIJCOSX",
-        dispersion_correction="D3BJ",
-        solvent="",
-        NMR=True,
-        freq=True
-    )
-
-    orca_job_sequence(
-        path_to_conf_search_xyz_files='data/LOT_benchmarks/LOT_benchmark_inputs',
-        destination_path='data/LOT_benchmarks/basis_sets/def2-TZVP_no_solvent',
-        geom_opt_arguments=geom_opt_arguments,
-        single_pt_arguments=single_pt_arguments
-    )
+    # orca_job(
+    #     path_to_xyz_file="data/LOT_benchmarks/LOT_benchmark_inputs/8_PdMeCl_def2-TZVP_geom_opt.xyz",
+    #     xyz_filename_no_extension="8_PdMeCl_geom_opt",
+    #     destination_path="data/LOT_benchmarks/TDDFT/6311",
+    #     job_type="TDDFT Calculation",
+    #     RI="autoaux RIJCOSX",
+    #     functional="CAM-B3LYP",
+    #     basis_set="6-311G++G(d,p)",
+    #     dispersion_correction="D3BJ",
+    #     solvent="CPCM(Chloroform)",
+    #     newgto='',
+    #     grid=""
+    # )
