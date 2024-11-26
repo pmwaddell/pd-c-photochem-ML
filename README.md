@@ -17,6 +17,15 @@
 
 ## Setup (WORK IN PROGRESS!)
 
+Please see the publication I coauthored ([10.1039/D3SC02588H](https://doi.org/10.1039/D3SC02588H), thanks to the RSC 
+for making it open access) describing visible light-induced homolytic Pd-C bond cleavage in phosphine-ligated, T-shaped 
+organopalladium complexes. This repo represents a computational exploration of the generality of this reactivity, and 
+how phosphine ligand properties can impact the photophysical and photochemical characteristics of these complexes.
+
+The exploration of phosphine chemical space in this project was facilitated by the 
+[Kraken virtual library](https://descriptor-libraries.molssi.org/kraken/).
+
+
 Things that are needed:
 
 * rdkit etc.
