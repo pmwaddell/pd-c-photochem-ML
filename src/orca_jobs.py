@@ -8,10 +8,6 @@ import os
 import subprocess
 import time
 import logging
-
-from joblib.func_inspect import full_argspec_fields
-from yaml import full_load
-
 logger = logging.getLogger(__name__)
 
 import yaml
@@ -31,7 +27,7 @@ def mkdir(dir_name: str) -> None:
 
 
 def make_uv_vis_plot(path_to_tddft_out: str, wavenum_min: int=10000, wavenum_max: int=50000,
-                     wavenum_broadening: int=1000) -> None:
+                     wavenum_broadening: int=4000) -> None:
     """Use orca_mapspc to generate .abs.dat and .abs.stk files from TDDFT ORCA calculation."""
     # Load the absolute path to ORCA from config.yaml; this is necessary for calculations run in parallel.
     with open("config.yaml") as f:
@@ -156,16 +152,19 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
 
 
 def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
-                      geom_opt_arguments: dict, single_pt_arguments: dict, tddft: bool=False) -> None:
+                      geom_opt_arguments: dict, part_2_arguments: dict, tddft: bool=False) -> None:
     """
-    Perform sequential geometry optimization and single point calculations based on .xyz files in a given directory.
+    Perform sequential geometry optimization and single point or TDDFT calcs from .xyz files in a given directory.
     """
     # Recursively search for the paths to all xyz files anywhere under the given path:
     xyz_file_paths = glob.glob(f"{path_to_conf_search_xyz_files}/**/*.xyz", recursive=True)
 
     logger.info(f"List of .xyz files found: {xyz_file_paths}.")
     logger.info(f"Geometry Optimization arguments: {geom_opt_arguments}")
-    logger.info(f"Single Point Calculation arguments: {single_pt_arguments}\n")
+    if tddft:
+        logger.info(f"TDDFT Calculation arguments: {part_2_arguments}\n")
+    else:
+        logger.info(f"Single Point Calculation arguments: {part_2_arguments}\n")
 
     for xyz_file_path in xyz_file_paths:
         # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
@@ -175,7 +174,10 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
 
         mkdir(f"{destination_path}/{mol_id}")
         mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
-        mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
+        if tddft:
+            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_tddft")
+        else:
+            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
         logger.info("\n")
 
         # Geometry optimization:
@@ -192,22 +194,22 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                 path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
                 xyz_filename_no_extension=xyz_filename,
                 destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
-                job_type="TDDFT Calculation", RI=single_pt_arguments["RI"],
-                functional=single_pt_arguments["functional"], basis_set=single_pt_arguments["basis_set"],
-                newgto=single_pt_arguments["newgto"],
-                dispersion_correction=single_pt_arguments["dispersion_correction"],
-                solvent=single_pt_arguments["solvent"], grid=single_pt_arguments["grid"],
-                freq=single_pt_arguments["freq"], NMR=single_pt_arguments["NMR"])
+                job_type="TDDFT Calculation", RI=part_2_arguments["RI"],
+                functional=part_2_arguments["functional"], basis_set=part_2_arguments["basis_set"],
+                newgto=part_2_arguments["newgto"],
+                dispersion_correction=part_2_arguments["dispersion_correction"],
+                solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
+                freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
             logger.info("Geometry optimization and TDDFT calculation steps complete.\n\n")
         else:
             # Single point calculation from the geometry optimization .xyz file:
             orca_job(path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
                      xyz_filename_no_extension=xyz_filename,
                      destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
-                     job_type="Single Point Calculation", RI=single_pt_arguments["RI"],
-                     functional=single_pt_arguments["functional"], basis_set=single_pt_arguments["basis_set"],
-                     newgto=single_pt_arguments["newgto"],
-                     dispersion_correction=single_pt_arguments["dispersion_correction"],
-                     solvent=single_pt_arguments["solvent"], grid=single_pt_arguments["grid"],
-                     freq=single_pt_arguments["freq"], NMR=single_pt_arguments["NMR"])
+                     job_type="Single Point Calculation", RI=part_2_arguments["RI"],
+                     functional=part_2_arguments["functional"], basis_set=part_2_arguments["basis_set"],
+                     newgto=part_2_arguments["newgto"],
+                     dispersion_correction=part_2_arguments["dispersion_correction"],
+                     solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
+                     freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
             logger.info("Geometry optimization and single point calculation steps complete.\n\n")
