@@ -186,14 +186,15 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                  job_type="Geometry Optimization", RI=geom_opt_arguments["RI"],
                  functional=geom_opt_arguments["functional"], basis_set=geom_opt_arguments["basis_set"],
                  newgto=geom_opt_arguments["newgto"], dispersion_correction=geom_opt_arguments["dispersion_correction"],
-                 solvent=geom_opt_arguments["solvent"], grid=geom_opt_arguments["grid"])
+                 solvent=geom_opt_arguments["solvent"], grid=geom_opt_arguments["grid"],
+                 freq=geom_opt_arguments["freq"], NMR=geom_opt_arguments["NMR"])
 
         if tddft:
             # Time-dependent DFT calculation from the geometry optimization .xyz file:
             orca_job(
                 path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
                 xyz_filename_no_extension=xyz_filename,
-                destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
+                destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_tddft",
                 job_type="TDDFT Calculation", RI=part_2_arguments["RI"],
                 functional=part_2_arguments["functional"], basis_set=part_2_arguments["basis_set"],
                 newgto=part_2_arguments["newgto"],
