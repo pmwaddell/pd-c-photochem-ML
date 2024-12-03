@@ -50,4 +50,4 @@ if __name__ == "__main__":
     complex_df = make_modified_phos_df(
         df, phos_smiles_to_pdmecl_complex_smiles, "molecule_id", "_PdMeCl")
     complex_df.to_csv('data/complex_smiles/PdMeCl_set.csv', index=False)
-    draw_from_phos_df(complex_df, '../misc/extra_complex_smiles/PdMeCl_set.png')
+    # draw_from_phos_df(complex_df, '../misc/extra_complex_smiles/PdMeCl_set.png')
