@@ -22,9 +22,9 @@ def make_uvvis_img_from_uvvis_df(uvvis_df: pd.DataFrame, molecule_id: str, desti
     ax2.plot(uvvis_df["wavelength"], uvvis_df["intensity"])
     ax2.set_xlim(300, 550)
 
-    # Set y limits to be the maximum intensity along 300-550, scale intensity appropriately:
+    # Set y limits to be the maximum intensity along 340-550, scale intensity appropriately:
     zoom_subrange = uvvis_df.loc[(uvvis_df["wavelength"] < 550)]
-    zoom_subrange = zoom_subrange.loc[(uvvis_df["wavelength"] > 325)]
+    zoom_subrange = zoom_subrange.loc[(uvvis_df["wavelength"] > 340)]
     max_y = max(zoom_subrange["intensity"])
     min_y = min(zoom_subrange["intensity"])
     ax2.set_ylim(min_y, max_y + (max_y * 0.5))
@@ -70,9 +70,9 @@ def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles
         make_uvvis_img_from_uvvis_df(uvvis_df, molecule_id=molecule_id, destination_path=destination_path,
                                      path_to_smiles_csv=path_to_smiles_csv)
 
-        # Find lambda max in the range 325-550 nm:
+        # Find lambda max in the range 340-550 nm:
         zoom_subrange = uvvis_df.loc[(uvvis_df["wavelength"] < 550)]
-        zoom_subrange = zoom_subrange.loc[(uvvis_df["wavelength"] > 325)]
+        zoom_subrange = zoom_subrange.loc[(uvvis_df["wavelength"] > 340)]
         max_intensity = max(zoom_subrange["intensity"])
         lambda_max = zoom_subrange[zoom_subrange.intensity == max_intensity]["wavelength"].iloc[0]
         lambda_maxes[molecule_id] = lambda_max

@@ -15,7 +15,7 @@
 
 ### 🏠 [Homepage](https://github.com/pmwaddell/ligands-ML)
 
-## Setup (WORK IN PROGRESS!)
+## Introduction
 
 Please see the publication I coauthored ([10.1039/D3SC02588H](https://doi.org/10.1039/D3SC02588H), thanks to the RSC 
 for making it open access) describing visible light-induced homolytic Pd-C bond cleavage in phosphine-ligated, T-shaped 
@@ -25,13 +25,24 @@ how phosphine ligand properties can impact the photophysical and photochemical c
 The exploration of phosphine chemical space in this project was facilitated by the 
 [Kraken virtual library](https://descriptor-libraries.molssi.org/kraken/).
 
+## Results and Discussion (Work in Progress)
 
-Things that are needed:
+For a [summary of my current results](presentations/pd-c-photochem-ML_slides.pdf), please see the slides in the presentations directory. Note that this is currently a 
+work in progress and does not represent peer-reviewed work at this time. 
 
-* rdkit etc.
-* pandas will be used I'm sure
+## Setup
+
+Requirements:
+
+* rdkit
+* pandas
+* matplotlib
+* yaml
 * ORCA (make sure you check the parallel option), with the absolute path indicated in config.yaml.
 * Microsoft MPI
+
+
+
 
 
 ## Author

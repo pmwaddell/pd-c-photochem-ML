@@ -21,7 +21,7 @@ def configure_logging(log_filename: str="logs/log.log") -> None:
 
 
 if __name__ == "__main__":
-    configure_logging("bigjob_split1")
+    configure_logging("bigjob_split1_2")
 
     geom_opt_arguments = dict(
         functional="B3LYP",
