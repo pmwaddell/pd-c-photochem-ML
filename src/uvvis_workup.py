@@ -47,6 +47,7 @@ def make_uvvis_img_from_uvvis_df(uvvis_df: pd.DataFrame, molecule_id: str, desti
     os.remove(f"{molecule_id}.png")
 
     plt.savefig(f"{destination_path}/{molecule_id}_uvvis.png")
+    plt.close()
 
 
 def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles_csv: str) -> None:
