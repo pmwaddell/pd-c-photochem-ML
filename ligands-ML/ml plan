@@ -1,0 +1,19 @@
+Ok for starters to be clear we are absolutely in a high-dimensional setting!!
+
+
+
+* "linear" regression to predict where the lambda max appears in the 350-450ish window
+    issues: how to algorithmically find this position accurately? might be trickier than one might think
+
+* Problem: we have 192 predictors and only like 100 data points, at most...
+so we will need to do some subset selection/shrinkage(regularization)
+
+Lasso in particular I think should be favored over Ridge Regression since Lasso will set coeffs to 0
+
+Consider hyperparameter tuning always...
+
+Model selection: Cp (AIC), BIC..., adjusted R2  but make sure these are relevant in high-dimensional case (Int Stat Learn pg 241)
+
+* Resampling: use whateverfold CV, bootstrapping...
+
+* validate against some test set? hold some random 20% of ligands out in order to test them?

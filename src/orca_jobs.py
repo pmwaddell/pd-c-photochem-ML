@@ -126,6 +126,10 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
     # If so, skip doing the calculation.
     if os.path.exists(f"{destination_path}/{full_filename}.out"):
         with open(f"{destination_path}/{full_filename}.out", 'r') as out_file:
+
+            # TODO: change this so that it uses regex instead of splitting the list
+            # I suspect that we are getting some false positives when it comes to detecting whether a calc didn't finish properly
+
             if out_file.read().splitlines()[-2].strip() == "****ORCA TERMINATED NORMALLY****":
                 logger.info(f"Existing .out file from completed calculation found in {destination_path}, "
                             f"skipping calculation.")
