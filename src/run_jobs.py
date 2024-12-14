@@ -14,7 +14,7 @@ def configure_logging(log_filename: str="logs/log.log") -> None:
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s %(message)s',
-        datefmt='%H:%M:%S',
+        datefmt='%Y/%m/%d %H:%M:%S',
         handlers=[logging.FileHandler(f"logs/{log_filename}.log", mode='w'),
                   stream_handler]
     )
