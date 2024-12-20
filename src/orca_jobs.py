@@ -1,7 +1,3 @@
-# https://sites.google.com/site/orcainputlibrary/geometry-optimizations
-# Use GGA DFT functionals if they are accurate enough (depends on your system), with the RI-J approximation (default)
-# as that is often the fastest useful optimization one can do. Use of the RI-J approximation leads to minimal
-# geometrical errors. Often the slightly higher accuracy from hybrid functionals is not worth the effort.
 import datetime
 import glob
 import os
@@ -127,9 +123,8 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
     if os.path.exists(f"{destination_path}/{full_filename}.out"):
         with open(f"{destination_path}/{full_filename}.out", 'r') as out_file:
 
-            # TODO: change this so that it uses regex instead of splitting the list
+            # TODO: change this so that it uses regex instead of splitting the list?
             # I suspect that we are getting some false positives when it comes to detecting whether a calc didn't finish properly
-
             if out_file.read().splitlines()[-2].strip() == "****ORCA TERMINATED NORMALLY****":
                 logger.info(f"Existing .out file from completed calculation found in {destination_path}, "
                             f"skipping calculation.")
@@ -156,9 +151,14 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
 
 
 def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
-                      geom_opt_arguments: dict, part_2_arguments: dict, tddft: bool=False) -> None:
+                      geom_opt_arguments: dict, part_2_arguments: dict,
+                      geom_opt: bool=True, single_pt: bool=False, tddft: bool=False) -> None:
     """
-    Perform sequential geometry optimization and single point or TDDFT calcs from .xyz files in a given directory.
+    Perform sequential geometry optimization, single point and/or TDDFT calcs from .xyz files in a given directory.
+
+    Mote: single point and TDDFT calculations will be based on the geometry optimization .xyz file, so make sure it
+    is there if you are running those calculations. In other words, they won't be done based on the .xyz files from the
+    INPUT path, which are assumed to be from a conformer search and therefore not suitable for these calculations.
     """
     # Recursively search for the paths to all xyz files anywhere under the given path:
     xyz_file_paths = glob.glob(f"{path_to_conf_search_xyz_files}/**/*.xyz", recursive=True)
@@ -177,23 +177,22 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
         mol_id = xyz_filename.split("_")[0]
 
         mkdir(f"{destination_path}/{mol_id}")
-        mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
+
+        if geom_opt:
+            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt")
+            # Geometry optimization calculation from the conformer search .xyz file:
+            orca_job(path_to_xyz_file=xyz_file_path, xyz_filename_no_extension=xyz_filename,
+                     destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt",
+                     job_type="Geometry Optimization", RI=geom_opt_arguments["RI"],
+                     functional=geom_opt_arguments["functional"], basis_set=geom_opt_arguments["basis_set"],
+                     newgto=geom_opt_arguments["newgto"],
+                     dispersion_correction=geom_opt_arguments["dispersion_correction"],
+                     solvent=geom_opt_arguments["solvent"], grid=geom_opt_arguments["grid"],
+                     freq=geom_opt_arguments["freq"], NMR=geom_opt_arguments["NMR"])
+            logger.info(f"{mol_id} geometry optimization complete.\n")
+
         if tddft:
             mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_tddft")
-        else:
-            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
-        logger.info("\n")
-
-        # Geometry optimization:
-        orca_job(path_to_xyz_file=xyz_file_path, xyz_filename_no_extension=xyz_filename,
-                 destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt",
-                 job_type="Geometry Optimization", RI=geom_opt_arguments["RI"],
-                 functional=geom_opt_arguments["functional"], basis_set=geom_opt_arguments["basis_set"],
-                 newgto=geom_opt_arguments["newgto"], dispersion_correction=geom_opt_arguments["dispersion_correction"],
-                 solvent=geom_opt_arguments["solvent"], grid=geom_opt_arguments["grid"],
-                 freq=geom_opt_arguments["freq"], NMR=geom_opt_arguments["NMR"])
-
-        if tddft:
             # Time-dependent DFT calculation from the geometry optimization .xyz file:
             orca_job(
                 path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
@@ -205,16 +204,21 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                 dispersion_correction=part_2_arguments["dispersion_correction"],
                 solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
                 freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
-            logger.info("Geometry optimization and TDDFT calculation steps complete.\n\n")
-        else:
+            logger.info(f"{mol_id} TDDFT calculation complete.\n")
+
+        if single_pt:
+            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
             # Single point calculation from the geometry optimization .xyz file:
-            orca_job(path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
-                     xyz_filename_no_extension=xyz_filename,
-                     destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
-                     job_type="Single Point Calculation", RI=part_2_arguments["RI"],
-                     functional=part_2_arguments["functional"], basis_set=part_2_arguments["basis_set"],
-                     newgto=part_2_arguments["newgto"],
-                     dispersion_correction=part_2_arguments["dispersion_correction"],
-                     solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
-                     freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
-            logger.info("Geometry optimization and single point calculation steps complete.\n\n")
+            orca_job(
+                path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
+                xyz_filename_no_extension=xyz_filename,
+                destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
+                job_type="Single Point Calculation", RI=part_2_arguments["RI"],
+                functional=part_2_arguments["functional"], basis_set=part_2_arguments["basis_set"],
+                newgto=part_2_arguments["newgto"],
+                dispersion_correction=part_2_arguments["dispersion_correction"],
+                solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
+                freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
+            logger.info(f"{mol_id} single point calculation complete.\n\n")
+
+        logger.info("\n")
