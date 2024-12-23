@@ -55,8 +55,8 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
     if job_type == "Geometry Optimization":
         job_keywords = "TightSCF Opt"
     elif job_type == "Single Point Calculation":
-        job_keywords = "NormalSCF"
-    elif job_type == "TDDFT Calculation":
+        job_keywords = "TightSCF"
+    elif job_type == "TDDFT Calculation" or job_type == "Single Point Calculation":
         job_keywords = "TightSCF"
         tddft = "\n%tddft\nnroots 40\nmaxdim 5\nend\n"
     else:
@@ -95,7 +95,7 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
         full_filename = xyz_filename_no_extension + "_geom_opt"
         # Note that xyz_filename should not contain the extension ".xyz"!! It should be the filename part only.
     elif job_type == "Single Point Calculation":
-        full_filename = xyz_filename_no_extension + "_single_pt"
+        full_filename = xyz_filename_no_extension + "_single_pt_quick"  # TODO: change back?
     elif job_type == "TDDFT Calculation":
         full_filename = xyz_filename_no_extension + "_tddft"
     else:
@@ -207,12 +207,12 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
             logger.info(f"{mol_id} TDDFT calculation complete.\n")
 
         if single_pt:
-            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt")
+            mkdir(f"{destination_path}/{mol_id}/{xyz_filename}_single_pt_quick")  # TODO: change back
             # Single point calculation from the geometry optimization .xyz file:
             orca_job(
                 path_to_xyz_file=f"{destination_path}/{mol_id}/{xyz_filename}_geom_opt/{xyz_filename}_geom_opt.xyz",
                 xyz_filename_no_extension=xyz_filename,
-                destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt",
+                destination_path=f"{destination_path}/{mol_id}/{xyz_filename}_single_pt_quick",   # TODO: change back
                 job_type="Single Point Calculation", RI=part_2_arguments["RI"],
                 functional=part_2_arguments["functional"], basis_set=part_2_arguments["basis_set"],
                 newgto=part_2_arguments["newgto"],

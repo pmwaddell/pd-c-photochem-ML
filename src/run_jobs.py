@@ -21,7 +21,7 @@ def configure_logging(log_filename: str="logs/log.log") -> None:
 
 
 if __name__ == "__main__":
-    configure_logging("bigjob_split1_6")
+    configure_logging("electronics_effects_2")
 
     geom_opt_arguments = dict(
         functional="B3LYP",
@@ -48,9 +48,10 @@ if __name__ == "__main__":
     )
 
     orca_job_sequence(
-        path_to_conf_search_xyz_files="data/bigjob/conf_search_splits/split1",
-        destination_path="data/bigjob/split1_result",
+        path_to_conf_search_xyz_files="data/electronic_effects_study/initial_conformers",
+        destination_path="data/electronic_effects_study/results",
         geom_opt_arguments=geom_opt_arguments,
         part_2_arguments=tddft_arguments,
+        geom_opt=True,
         tddft=True
     )

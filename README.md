@@ -28,7 +28,7 @@ The exploration of phosphine chemical space in this project was facilitated by t
 ## Results and Discussion (Work in Progress)
 
 For a [summary of my current results](presentations/pd-c-photochem-ML_slides.pdf), please see the slides in the presentations directory. Note that this is currently a 
-work in progress and does not represent peer-reviewed work at this time. 
+work in progress and does not represent finished, peer-reviewed work at this time. 
 
 ## Setup
 

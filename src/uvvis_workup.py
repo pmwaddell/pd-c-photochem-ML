@@ -9,11 +9,17 @@ from rdkit.Chem import Draw
 
 
 def make_uvvis_img_from_uvvis_df(uvvis_df: pd.DataFrame, molecule_id: str, destination_path: str,
-                                 path_to_smiles_csv: str) -> None:
+                                 path_to_smiles_csv: str, complex_picture: bool=True) -> None:
     """Creates an image with two views of the TDDFT UV-vis spectrum and an image of the complex."""
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    fig.set_figheight(5)
-    fig.set_figwidth(20)
+    if complex_picture:
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+        fig.set_figheight(5)
+        fig.set_figwidth(20)
+    else:
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        fig.set_figheight(5)
+        fig.set_figwidth(14)
+
     ax1.plot(uvvis_df["wavelength"], uvvis_df["intensity"])
     ax1.set_xlabel("wavelength (nm)")
     ax1.set_ylabel("intensity")
@@ -36,21 +42,23 @@ def make_uvvis_img_from_uvvis_df(uvvis_df: pd.DataFrame, molecule_id: str, desti
     ax2.set_ylabel("intensity")
     ax2.set_title(f"{molecule_id} UV-vis, zoom")
 
-    # Add the image of the complex
-    PdMeCl_set = pd.read_csv(path_to_smiles_csv)
-    smiles = PdMeCl_set[PdMeCl_set.molecule_id == molecule_id].iloc[0, 1]
-    Draw.MolToFile(Chem.MolFromSmiles(smiles), f"{molecule_id}.png")
-    img = mpimg.imread(f"{molecule_id}.png")
-    ax3.imshow(img)
-    ax3.axis('off')
-    ax3.set_title(molecule_id)
-    os.remove(f"{molecule_id}.png")
+    if complex_picture:
+        # Add the image of the complex
+        PdMeCl_set = pd.read_csv(path_to_smiles_csv)
+        smiles = PdMeCl_set[PdMeCl_set.molecule_id == molecule_id].iloc[0, 1]
+        Draw.MolToFile(Chem.MolFromSmiles(smiles), f"{molecule_id}.png")
+        img = mpimg.imread(f"{molecule_id}.png")
+        ax3.imshow(img)
+        ax3.axis('off')
+        ax3.set_title(molecule_id)
+        os.remove(f"{molecule_id}.png")
 
     plt.savefig(f"{destination_path}/{molecule_id}_uvvis.png")
     plt.close()
 
 
-def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles_csv: str) -> None:
+def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles_csv: str,
+                 complex_pictures: bool=True) -> None:
     """
     Finds all .out.abs.dat files recursively in a given directory and produces images of their UV-vis spectra, and
     also compiles their spectral data and lambda max data into respective excel spreadsheets.
@@ -69,7 +77,7 @@ def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles
         uvvis_dfs[molecule_id] = uvvis_df
 
         make_uvvis_img_from_uvvis_df(uvvis_df, molecule_id=molecule_id, destination_path=destination_path,
-                                     path_to_smiles_csv=path_to_smiles_csv)
+                                     path_to_smiles_csv=path_to_smiles_csv, complex_picture=complex_pictures)
 
         # Find lambda max in the range 340-550 nm:
         zoom_subrange = uvvis_df.loc[(uvvis_df["wavelength"] < 550)]
@@ -88,8 +96,16 @@ def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles
     lambda_max_df.to_excel(f"{destination_path}/lambda_maxes.xlsx", index=False)
 
 
-uvvis_workup(
-    path_to_uvvis_files="data/bigjob/split1_result",
-    destination_path="data/bigjob/split1_result/uvvis_workup",
-    path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv"
-)
+if __name__ == "__main__":
+    # uvvis_workup(
+    #     path_to_uvvis_files="data/bigjob/split1_result",
+    #     destination_path="data/bigjob/split1_result/uvvis_workup",
+    #     path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv"
+    # )
+
+    uvvis_workup(
+        path_to_uvvis_files="data/electronic_effects_study/results",
+        destination_path="data/electronic_effects_study/results/uvvis_workup",
+        path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv",
+        complex_pictures=False
+    )
