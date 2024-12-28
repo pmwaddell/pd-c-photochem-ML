@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def single_pt_E_workup(path_to_single_pt_out_files: str, destination_path: str, skip_tddft: bool=False,
-                       suffixes_to_skip: List=("atom46")) -> None:
+                       suffixes_to_skip: List=tuple("atom46")) -> None:
     """
     Finds all .out files recursively in a given directory and checks if they have single point calculations.
     For the ones that do, their single point energies are compiled into an Excel spreadsheet.
