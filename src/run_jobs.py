@@ -21,7 +21,7 @@ def configure_logging(log_filename: str="logs/log.log") -> None:
 
 
 if __name__ == "__main__":
-    configure_logging("electronics_effects_2")
+    configure_logging("split1_rotamers_1")
 
     geom_opt_arguments = dict(
         functional="B3LYP",
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         NMR=False
     )
 
-    tddft_arguments = dict(
+    pt_two_arguments = dict(
         functional="B3LYP",
         basis_set="def2-TZVPP",
         newgto='',
@@ -48,10 +48,11 @@ if __name__ == "__main__":
     )
 
     orca_job_sequence(
-        path_to_conf_search_xyz_files="data/electronic_effects_study/initial_conformers",
-        destination_path="data/electronic_effects_study/results",
+        path_to_conf_search_xyz_files="data/bigjob/split1_rotamers",
+        destination_path="data/bigjob/split1_rotamers_result",
         geom_opt_arguments=geom_opt_arguments,
-        part_2_arguments=tddft_arguments,
+        part_2_arguments=pt_two_arguments,
         geom_opt=True,
+        single_pt=True,
         tddft=True
     )

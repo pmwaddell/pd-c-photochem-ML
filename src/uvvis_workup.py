@@ -97,15 +97,9 @@ def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles
 
 
 if __name__ == "__main__":
-    # uvvis_workup(
-    #     path_to_uvvis_files="data/bigjob/split1_result",
-    #     destination_path="data/bigjob/split1_result/uvvis_workup",
-    #     path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv"
-    # )
-
     uvvis_workup(
-        path_to_uvvis_files="data/electronic_effects_study/results",
-        destination_path="data/electronic_effects_study/results/uvvis_workup",
+        path_to_uvvis_files="data/bigjob/split1_rotamers_result",
+        destination_path="data/bigjob/split1_rotamers_result/uvvis_workup",
         path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv",
         complex_pictures=False
     )
