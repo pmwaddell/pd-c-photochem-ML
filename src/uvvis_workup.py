@@ -45,7 +45,8 @@ def make_uvvis_img_from_uvvis_df(uvvis_df: pd.DataFrame, molecule_id: str, desti
     if complex_picture:
         # Add the image of the complex
         PdMeCl_set = pd.read_csv(path_to_smiles_csv)
-        smiles = PdMeCl_set[PdMeCl_set.molecule_id == molecule_id].iloc[0, 1]
+        complex_id = "_".join(molecule_id.split("_")[:2])
+        smiles = PdMeCl_set[PdMeCl_set.molecule_id == complex_id].iloc[0, 1]
         Draw.MolToFile(Chem.MolFromSmiles(smiles), f"{molecule_id}.png")
         img = mpimg.imread(f"{molecule_id}.png")
         ax3.imshow(img)
@@ -97,9 +98,13 @@ def uvvis_workup(path_to_uvvis_files: str, destination_path: str, path_to_smiles
 
 
 if __name__ == "__main__":
+    # uvvis_workup(
+    #     path_to_uvvis_files="data/bigjob/split1_rotamers_result",
+    #     destination_path="data/bigjob/split1_rotamers_result/uvvis_workup",
+    #     path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv"
+    # )
     uvvis_workup(
-        path_to_uvvis_files="data/bigjob/split1_rotamers_result",
-        destination_path="data/bigjob/split1_rotamers_result/uvvis_workup",
-        path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv",
-        complex_pictures=False
+        path_to_uvvis_files="data/bigjob/AIM/20067_variations/results",
+        destination_path="data/bigjob/AIM/20067_variations/results/",
+        path_to_smiles_csv="data/complex_smiles/PdMeCl_set.csv"
     )

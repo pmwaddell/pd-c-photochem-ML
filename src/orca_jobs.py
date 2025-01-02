@@ -41,7 +41,7 @@ def make_uv_vis_plot(path_to_tddft_out: str, wavenum_min: int=10000, wavenum_max
 
 def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: str, RI: str, functional: str,
                       basis_set: str, newgto: str, dispersion_correction: str, solvent: str, grid: str, charge: int=0,
-                      freq: bool=False, NMR: bool=False, cores=6) -> None:
+                      freq: bool=False, NMR: bool=False, orbitals: bool=False, cores=6) -> None:
     """Produces an ORCA input file for geom. opt. from xyz file."""
     # The choices of keywords here are from: https://sites.google.com/site/orcainputlibrary/geometry-optimizations
     # RI: RI-J approximation for Coulomb integrals: speed calculations at cost of small error, used for GGA calcs.
@@ -64,6 +64,7 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
         raise Exception(f"Unknown job type {job_type}")
 
     freq = "Freq" if freq else ""
+    largeprint = "! LARGEPRINT\n" if orbitals else ""
     NMR = "NMR" if NMR else ""
     if grid != "":
         grid = f"! {grid}\n"
@@ -74,6 +75,7 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
               f"{newgto}"
               f"{grid}"
               f"{tddft}"
+              f"{largeprint}"
               f"%pal\nnprocs {cores}\nend\n\n* xyz {charge} 1\n")
     with open(xyz_filename, 'r') as xyz_file:
         # Remove the initial lines of the xyz file, leaving only the atoms and their coordinates:
@@ -86,7 +88,7 @@ def make_inp_from_xyz(xyz_filename: str, inp_destination_path: str, job_type: st
 # TODO: change it so path_to_xyz_file contains the xyz_filename and we just parse it out in the function?
 def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_path: str, job_type: str,
              RI: str, functional: str, basis_set: str, newgto: str, dispersion_correction: str, solvent: str,
-             grid: str, charge: int=0, freq: bool=False, NMR: bool=False) -> None:
+             grid: str, charge: int=0, freq: bool=False, NMR: bool=False, orbitals: bool=False) -> None:
     """Performs ORCA calculations based on the inputs and given xyz file."""
     # We are trying to stick to Linux-style path formatting, so replace the Windows \\ with /:
     path_to_xyz_file = path_to_xyz_file.replace("\\", "/")
@@ -114,6 +116,7 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
         charge=charge,
         freq=freq,
         NMR=NMR,
+        orbitals=orbitals,
         xyz_filename=path_to_xyz_file,
         inp_destination_path=f"{destination_path}/{full_filename}.inp"
     )
@@ -188,7 +191,8 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                      newgto=geom_opt_arguments["newgto"],
                      dispersion_correction=geom_opt_arguments["dispersion_correction"],
                      solvent=geom_opt_arguments["solvent"], grid=geom_opt_arguments["grid"],
-                     freq=geom_opt_arguments["freq"], NMR=geom_opt_arguments["NMR"])
+                     freq=geom_opt_arguments["freq"], NMR=geom_opt_arguments["NMR"],
+                     orbitals=geom_opt_arguments["orbitals"])
             logger.info(f"{mol_id} geometry optimization complete.\n")
 
         if tddft:
@@ -203,7 +207,7 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                 newgto=part_2_arguments["newgto"],
                 dispersion_correction=part_2_arguments["dispersion_correction"],
                 solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
-                freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
+                freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"], orbitals=part_2_arguments["orbitals"])
             logger.info(f"{mol_id} TDDFT calculation complete.\n")
 
         if single_pt:
@@ -218,7 +222,7 @@ def orca_job_sequence(path_to_conf_search_xyz_files: str, destination_path: str,
                 newgto=part_2_arguments["newgto"],
                 dispersion_correction=part_2_arguments["dispersion_correction"],
                 solvent=part_2_arguments["solvent"], grid=part_2_arguments["grid"],
-                freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"])
+                freq=part_2_arguments["freq"], NMR=part_2_arguments["NMR"], orbitals=part_2_arguments["orbitals"])
             logger.info(f"{mol_id} single point calculation complete.\n\n")
 
         logger.info("\n")
