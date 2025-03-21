@@ -26,7 +26,7 @@ def make_uv_vis_plot(path_to_tddft_out: str, wavenum_min: int=10000, wavenum_max
                      wavenum_broadening: int=4000) -> None:
     """Use orca_mapspc to generate .abs.dat and .abs.stk files from TDDFT ORCA calculation."""
     # Load the absolute path to ORCA from config.yaml; this is necessary for calculations run in parallel.
-    with open("config.yaml") as f:
+    with open("src/config.yaml") as f:
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         orca_path = cfg['orca_path']
 
@@ -137,7 +137,7 @@ def orca_job(path_to_xyz_file: str, xyz_filename_no_extension: str, destination_
                                f"in {destination_path}, redoing calculation.")
 
     # Load the absolute path to ORCA from config.yaml; this is necessary for calculations run in parallel.
-    with open("config.yaml") as f:
+    with open("src/config.yaml") as f:
         cfg = yaml.load(f, Loader=yaml.FullLoader)
         orca_path = cfg['orca_path']
 

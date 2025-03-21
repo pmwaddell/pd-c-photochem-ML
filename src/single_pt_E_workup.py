@@ -57,7 +57,7 @@ def single_pt_E_workup(path_to_single_pt_out_files: str, destination_path: str, 
 
 if __name__ == "__main__":
     single_pt_E_workup(
-        path_to_single_pt_out_files="data/bigjob",
-        destination_path="data/bigjob",
+        path_to_single_pt_out_files="src/data/all_bigjob/round_3",
+        destination_path="src/data/all_bigjob/round_3",
         suffixes_to_skip=["tddft", "atom46", "geom_opt"]
     )
